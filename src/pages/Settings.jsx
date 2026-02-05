@@ -1,25 +1,14 @@
-import TopBar from "../components/TopBar";
-import { useState, useEffect, useContext } from "react";
+import { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
 import { auth } from "../firebase/config";
 import { deleteTaskFromDB, fetchTasksFromDB } from "../firebase/tasks";
 import { SettingsContext } from "../context/SettingsContext";
+import Layout from "../components/Layout";
 
 const Settings = () => {
   const navigate = useNavigate();
   const contextValue = useContext(SettingsContext);
-  const { settings = { theme: "dark", hideCompleted: false }, saveSettings = () => {}, theme: themeObj } = contextValue || {};
-
-  useEffect(() => {
-    if (themeObj) {
-      document.body.style.background = themeObj.background;
-      document.body.style.backgroundAttachment = "fixed";
-      document.body.style.backgroundSize = "cover";
-      document.body.style.minHeight = "100vh";
-      document.body.style.color = themeObj.text;
-    }
-  }, [themeObj]);
+  const { settings = { theme: "dark", hideCompleted: false }, saveSettings = () => { }, theme: themeObj } = contextValue || {};
 
   const [theme, setTheme] = useState(settings.theme || "dark");
   const [hideCompleted, setHideCompleted] = useState(settings.hideCompleted || false);
@@ -40,17 +29,13 @@ const Settings = () => {
     const user = auth.currentUser;
     if (!user) return;
 
-    const confirmClear = window.confirm(
-      "This will delete all completed tasks. Continue?"
-    );
-
-    if (!confirmClear) return;
+    if (!window.confirm("This will delete all completed tasks. Continue?")) return;
 
     setSaving(true);
 
     // Fetch current tasks to get completed ones
     const unsubscribe = fetchTasksFromDB(user.uid, async (tasks) => {
-      const completedTasks = tasks.filter((task) => task.completed);
+      const completedTasks = tasks.filter((task) => task.completed || task.status === 'done');
 
       // Delete each completed task
       for (const task of completedTasks) {
@@ -63,8 +48,7 @@ const Settings = () => {
   };
 
   return (
-    <div style={getStyles(themeObj).page}>
-      <TopBar />
+    <Layout>
       <h2 style={getStyles(themeObj).title}>Settings</h2>
 
       <div style={getStyles(themeObj).card}>
@@ -129,17 +113,9 @@ const Settings = () => {
             <p style={getStyles(themeObj).muted}>Manage your task history</p>
           </div>
 
-          <button 
+          <button
             style={getStyles(themeObj).secondaryButton}
             onClick={handleClearCompletedTasks}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = "linear-gradient(135deg, #A75885, #8F3A76)";
-              e.currentTarget.style.boxShadow = "0 10px 28px rgba(167,88,133,0.28)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = themeObj?.buttonBackground || "rgba(255,255,255,0.04)";
-              e.currentTarget.style.boxShadow = "none";
-            }}
           >
             Clear completed tasks
           </button>
@@ -159,38 +135,14 @@ const Settings = () => {
           </button>
         </div>
       </div>
-
-      {/* Back */}
-      <button style={getStyles(themeObj).backButton} onClick={() => navigate("/dashboard")}>
-        <ArrowLeft size={16} />
-        Back to dashboard
-      </button>
-    </div>
+    </Layout>
   );
 };
 
 const styles = {
-  page: {
-    maxWidth: "900px",
-    margin: "0 auto",
-    padding: "48px 20px",
-    color: "#E6EEF3",
-    minHeight: "100vh",
-  },
-  title: {
-    fontSize: "28px",
-    fontWeight: 700,
-    marginBottom: "24px",
-    color: "#E6EEF3",
-  },
-  card: {
-    background: "rgba(0,0,0,0.35)",
-    backdropFilter: "blur(10px)",
-    borderRadius: "18px",
-    padding: "32px",
-    boxShadow: "0 18px 40px rgba(0,0,0,0.55)",
-    border: "1px solid rgba(255,255,255,0.05)",
-  },
+  // keeping rudimentary default styles if themeObj is missing
+  title: { fontSize: "28px", fontWeight: 700, marginBottom: "24px", color: "#E6EEF3" },
+  card: { background: "rgba(0,0,0,0.2)", padding: "32px", borderRadius: "16px" },
   section: {
     display: "flex",
     justifyContent: "space-between",
@@ -272,31 +224,13 @@ const styles = {
     boxShadow: "0 10px 28px rgba(167,88,133,0.28)",
     transition: "all 0.2s ease",
   },
-  backButton: {
-    marginTop: "24px",
-    background: "none",
-    border: "none",
-    color: "#E6F7FF",
-    display: "flex",
-    alignItems: "center",
-    gap: "8px",
-    cursor: "pointer",
-    opacity: 0.8,
-    transition: "all 0.2s ease",
-  },
 };
 
 const getStyles = (theme) => {
+  // Re-using the excellent existing style logic, just mapped slightly for Layout context if needed
   if (!theme) return styles;
 
   return {
-    page: {
-      maxWidth: "900px",
-      margin: "0 auto",
-      padding: "48px 20px",
-      color: theme.text,
-      minHeight: "100vh",
-    },
     title: {
       fontSize: "28px",
       fontWeight: 700,
@@ -344,7 +278,7 @@ const getStyles = (theme) => {
       width: "24px",
       height: "24px",
       borderRadius: "50%",
-      background: theme.name === "dark" ? "#fff" : "#1F2937",
+      background: theme.name === "dark" ? "#fff" : theme.text,
       top: "2px",
       left: "2px",
       transition: "transform 0.3s ease",
@@ -390,18 +324,6 @@ const getStyles = (theme) => {
       color: "#fff",
       background: "linear-gradient(135deg, #A75885, #8F3A76)",
       boxShadow: "0 10px 28px rgba(167,88,133,0.28)",
-      transition: "all 0.2s ease",
-    },
-    backButton: {
-      marginTop: "24px",
-      background: "none",
-      border: "none",
-      color: theme.text,
-      display: "flex",
-      alignItems: "center",
-      gap: "8px",
-      cursor: "pointer",
-      opacity: 0.8,
       transition: "all 0.2s ease",
     },
   };

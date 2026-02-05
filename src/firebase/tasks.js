@@ -13,13 +13,31 @@ import {
 } from "firebase/firestore";
 
 // ADD TASK
-export const addTaskToDB = async (uid, text) => {
-  await addDoc(collection(db, "tasks"), {
+export const addTaskToDB = async (uid, taskData) => {
+  // taskData should include: text, priority, category, dueDate, reminderTime, etc.
+  const { 
+    text, 
+    priority = "medium", 
+    category = "personal", 
+    dueDate = null, 
+    reminderTime = null,
+    subtasks = [],
+    status = "todo" // todo, in-progress, done
+  } = taskData;
+
+  const docRef = await addDoc(collection(db, "tasks"), {
     uid,
     text,
-    completed: false,
+    completed: false, // Legacy field, mapped to status='done'
+    status, 
+    priority,
+    category,
+    dueDate,
+    reminderTime,
+    subtasks,
     createdAt: serverTimestamp(),
   });
+  return docRef.id;
 };
 
 // REALTIME FETCH TASKS
@@ -31,10 +49,18 @@ export const fetchTasksFromDB = (uid, callback) => {
   );
 
   return onSnapshot(q, (snapshot) => {
-    const tasks = snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
+    const tasks = snapshot.docs.map((doc) => {
+      const data = doc.data();
+      // Backwards compatibility for existing tasks
+      return {
+        id: doc.id,
+        status: data.status || (data.completed ? "done" : "todo"),
+        priority: data.priority || "medium",
+        category: data.category || "personal",
+        subtasks: data.subtasks || [],
+        ...data,
+      };
+    });
     callback(tasks);
   });
 };

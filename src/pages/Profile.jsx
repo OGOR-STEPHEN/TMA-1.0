@@ -1,11 +1,13 @@
+
 import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, LogOut } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { SettingsContext } from "../context/SettingsContext";
 import { useAuth } from "../context/AuthContext";
 import { db } from "../firebase/config";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { logoutUser } from "../firebase/auth";
+import Layout from "../components/Layout";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -37,15 +39,12 @@ const Profile = () => {
 
         if (userDocSnap.exists()) {
           const userData = userDocSnap.data();
-          console.log("User data from Firestore:", userData);
           setProfile({
             fullName: userData.fullName || "",
             email: userData.email || user.email || "",
             username: userData.username || "",
           });
         } else {
-          console.log("No user document found in Firestore");
-          // Fallback to Firebase auth data if no Firestore document
           setProfile({
             fullName: user.displayName || "",
             email: user.email || "",
@@ -62,24 +61,13 @@ const Profile = () => {
     fetchUserProfile();
   }, [user]);
 
-  // Set background and theme
-  useEffect(() => {
-    if (themeObj) {
-      document.body.style.background = themeObj.background;
-      document.body.style.backgroundAttachment = "fixed";
-      document.body.style.backgroundSize = "cover";
-      document.body.style.minHeight = "100vh";
-      document.body.style.color = themeObj.text;
-    }
-  }, [themeObj]);
-
   const handleChange = (e) => {
     setProfile({ ...profile, [e.target.name]: e.target.value });
   };
 
   const handleSave = async () => {
     if (!user) return;
-    
+
     setIsSaving(true);
     try {
       const userDocRef = doc(db, "users", user.uid);
@@ -89,7 +77,7 @@ const Profile = () => {
         username: profile.username,
         updatedAt: new Date(),
       });
-      
+
       setIsEditing(false);
     } catch (error) {
       console.error("Error saving profile:", error);
@@ -111,25 +99,16 @@ const Profile = () => {
 
   if (loading) {
     return (
-      <div style={getStyles(themeObj).page}>
-        <div style={{ textAlign: "center", paddingTop: "100px", color: themeObj?.text || "#E6EEF3" }}>
+      <Layout>
+        <div style={{ textAlign: "center", paddingTop: "100px" }}>
           Loading profile...
         </div>
-      </div>
+      </Layout>
     );
   }
 
   return (
-    <div style={getStyles(themeObj).page}>
-      {/* Back Button */}
-      <button
-        style={getStyles(themeObj).backButton}
-        onClick={() => navigate(-1)}
-      >
-        <ArrowLeft size={16} />
-        Back
-      </button>
-
+    <Layout>
       <h1 style={getStyles(themeObj).title}>Profile</h1>
 
       {/* Personal Information Card */}
@@ -183,17 +162,6 @@ const Profile = () => {
             <button
               style={getStyles(themeObj).secondaryButton}
               onClick={() => setIsEditing(true)}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = themeObj?.buttonBackground
-                  ? `${themeObj.buttonBackground}99`
-                  : "rgba(255,255,255,0.08)";
-                e.currentTarget.style.color = "#A75885";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background =
-                  themeObj?.buttonBackground || "rgba(255,255,255,0.04)";
-                e.currentTarget.style.color = themeObj?.text || "#E6F7FF";
-              }}
             >
               Edit Profile
             </button>
@@ -202,15 +170,6 @@ const Profile = () => {
               <button
                 style={getStyles(themeObj).secondaryButton}
                 onClick={() => setIsEditing(false)}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = themeObj?.buttonBackground
-                    ? `${themeObj.buttonBackground}99`
-                    : "rgba(255,255,255,0.08)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background =
-                    themeObj?.buttonBackground || "rgba(255,255,255,0.04)";
-                }}
               >
                 Cancel
               </button>
@@ -243,23 +202,13 @@ const Profile = () => {
           <button
             style={getStyles(themeObj).logoutButton}
             onClick={handleLogout}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background =
-                "rgba(239, 68, 68, 0.15)";
-              e.currentTarget.style.color = "#EF4444";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background =
-                "rgba(239, 68, 68, 0.1)";
-              e.currentTarget.style.color = themeObj?.textSecondary || "#B6C2CF";
-            }}
           >
             <LogOut size={16} />
             Log Out
           </button>
         </div>
       </div>
-    </div>
+    </Layout>
   );
 };
 

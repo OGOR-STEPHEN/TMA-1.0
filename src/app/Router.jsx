@@ -2,6 +2,10 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "../pages/Login.jsx";
 import Signup from "../pages/Signup";
 import Dashboard from "../pages/Dashboard";
+import Board from "../pages/Board";
+import Habits from "../pages/Habits";
+import Focus from "../pages/Focus";
+import Reports from "../pages/Reports";
 import ForgotPassword from "../pages/ForgotPassword.jsx";
 import Settings from "../pages/Settings.jsx";
 import { SettingsProvider } from "../context/SettingsContext";
@@ -48,6 +52,38 @@ const Router = () => {
               element={
                 <ProtectedRoute>
                   <Dashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/board"
+              element={
+                <ProtectedRoute>
+                  <Board />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/habits"
+              element={
+                <ProtectedRoute>
+                  <Habits />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/focus"
+              element={
+                <ProtectedRoute>
+                  <Focus />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/reports"
+              element={
+                <ProtectedRoute>
+                  <Reports />
                 </ProtectedRoute>
               }
             />
