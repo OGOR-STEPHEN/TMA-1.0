@@ -15,6 +15,10 @@ import {
 import { auth } from "../firebase/config";
 import { fetchTasksFromDB } from "../firebase/tasks";
 import { onAuthStateChanged } from "firebase/auth";
+import jsPDF from "jspdf";
+import { Document, Packer, Paragraph, TextRun, HeadingLevel } from "docx";
+import { saveAs } from "file-saver";
+import { Download, FileText } from "lucide-react";
 
 const Reports = () => {
     const [tasks, setTasks] = useState([]);
@@ -49,10 +53,133 @@ const Reports = () => {
         { name: "Low", count: low },
     ];
 
+    const generatePDF = () => {
+        const doc = new jsPDF();
+        const date = new Date().toLocaleDateString();
+        const completedTasks = tasks.filter(t => t.completed || t.status === "done");
+
+        // Header
+        doc.setFontSize(22);
+        doc.setTextColor(40, 40, 40);
+        doc.text("Daily Activity Report", 20, 20);
+
+        doc.setFontSize(10);
+        doc.setTextColor(100);
+        doc.text(`Generated on: ${date}`, 20, 30);
+
+        // Separator
+        doc.setLineWidth(0.5);
+        doc.setDrawColor(200);
+        doc.line(20, 35, 190, 35);
+
+        let yPos = 50;
+        doc.setFontSize(14);
+        doc.setTextColor(0);
+
+        // Narrative Section
+        if (completedTasks.length > 0) {
+            doc.setFont(undefined, 'bold');
+            doc.text("Summary:", 20, yPos);
+            yPos += 10;
+
+            doc.setFont(undefined, 'normal');
+            doc.setFontSize(12);
+            // Constructing narrative: "Today i washed the dishes and cleaned my room"
+            // We use the task text directly.
+            const taskListPhrase = completedTasks.map((t, i) => {
+                const text = t.text.trim();
+                return (i === completedTasks.length - 1 && i > 0) ? `and ${text}` : text;
+            }).join(completedTasks.length > 2 ? ", " : " ");
+
+            const narrative = `Today I ${taskListPhrase}.`;
+            const splitNarrative = doc.splitTextToSize(narrative, 170);
+            doc.text(splitNarrative, 20, yPos);
+            yPos += splitNarrative.length * 7 + 10;
+
+            // List Details
+            doc.setFont(undefined, 'bold');
+            doc.setFontSize(14);
+            doc.text("Task Details:", 20, yPos);
+            yPos += 10;
+            doc.setFont(undefined, 'normal');
+            doc.setFontSize(12);
+
+            completedTasks.forEach(t => {
+                doc.text(`• ${t.text} (${t.priority})`, 25, yPos);
+                yPos += 7;
+            });
+        } else {
+            doc.text("No tasks completed today.", 20, yPos);
+        }
+
+        doc.save(`TMA_Report_${date.replace(/\//g, "-")}.pdf`);
+    };
+
+    const generateDOC = () => {
+        const date = new Date().toLocaleDateString();
+        const completedTasks = tasks.filter(t => t.completed || t.status === "done");
+
+        const taskListPhrase = completedTasks.length > 0 ? completedTasks.map((t, i) => {
+            const text = t.text.trim();
+            return (i === completedTasks.length - 1 && i > 0) ? `and ${text}` : text;
+        }).join(completedTasks.length > 2 ? ", " : " ") : "";
+
+        const narrative = completedTasks.length > 0
+            ? `Today I ${taskListPhrase}.`
+            : "No tasks completed today.";
+
+        const doc = new Document({
+            sections: [{
+                properties: {},
+                children: [
+                    new Paragraph({
+                        text: "Daily Activity Report",
+                        heading: HeadingLevel.HEADING_1,
+                    }),
+                    new Paragraph({
+                        text: `Generated on: ${date}`,
+                        color: "888888"
+                    }),
+                    new Paragraph({ text: "" }),
+                    new Paragraph({
+                        text: "Summary",
+                        heading: HeadingLevel.HEADING_2
+                    }),
+                    new Paragraph({
+                        text: narrative
+                    }),
+                    new Paragraph({ text: "" }),
+                    new Paragraph({
+                        text: "Task Details",
+                        heading: HeadingLevel.HEADING_2
+                    }),
+                    ...completedTasks.map(t => new Paragraph({
+                        text: `• ${t.text} [${t.priority}]`,
+                        bullet: { level: 0 }
+                    }))
+                ]
+            }]
+        });
+
+        Packer.toBlob(doc).then(blob => {
+            saveAs(blob, `TMA_Report_${date.replace(/\//g, "-")}.docx`);
+        });
+    };
+
     return (
         <Layout>
             <div style={styles.header}>
-                <h1>Analytics Report</h1>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <h1>Analytics Report</h1>
+                    <div style={{ display: 'flex', gap: '10px' }}>
+                        <button onClick={generatePDF} style={styles.button}>
+                            <Download size={18} /> PDF
+                        </button>
+                        <button onClick={generateDOC} style={styles.button}>
+                            <FileText size={18} /> DOC
+                        </button>
+                    </div>
+                </div>
             </div>
 
             <div style={styles.grid}>
@@ -137,6 +264,19 @@ const styles = {
         background: "linear-gradient(135deg, #a75885, #8f3a76)",
         WebkitBackgroundClip: "text",
         WebkitTextFillColor: "transparent"
+    },
+    button: {
+        display: "flex",
+        alignItems: "center",
+        gap: "8px",
+        background: "rgba(167, 88, 133, 0.2)",
+        color: "#a75885",
+        border: "1px solid rgba(167, 88, 133, 0.4)",
+        padding: "8px 16px",
+        borderRadius: "8px",
+        cursor: "pointer",
+        fontWeight: "bold",
+        transition: "all 0.2s",
     }
 };
 
