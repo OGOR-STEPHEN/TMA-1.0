@@ -53,10 +53,42 @@ const Reports = () => {
         { name: "Low", count: low },
     ];
 
+    const getReportNarrative = (completedTasks) => {
+        if (completedTasks.length === 0) return "No tasks completed today.";
+
+        const total = completedTasks.length;
+        const highPriority = completedTasks.filter(t => t.priority === "high").length;
+        const categories = [...new Set(completedTasks.map(t => t.category))];
+
+        // Introduction
+        const intro = total > 3
+            ? `It was a productive day with ${total} tasks completed.`
+            : `Today saw the completion of ${total} task${total > 1 ? 's' : ''}.`;
+
+        // Priority mention
+        const priorityText = highPriority > 0
+            ? ` I focused on high-priority items, clearing ${highPriority} critical task${highPriority > 1 ? 's' : ''}.`
+            : "";
+
+        // Category breakdown
+        const categoryText = categories.length > 0
+            ? ` Activities spanned across ${categories.join(", ")}.`
+            : "";
+
+        // Task Highlights
+        const highlights = completedTasks.slice(0, 3).map(t => t.text).join(", ");
+        const highlightsText = total > 3
+            ? ` Key highlights include: ${highlights}, among others.`
+            : ` I managed to: ${highlights}.`;
+
+        return `${intro}${priorityText}${categoryText}${highlightsText}`;
+    };
+
     const generatePDF = () => {
         const doc = new jsPDF();
         const date = new Date().toLocaleDateString();
         const completedTasks = tasks.filter(t => t.completed || t.status === "done");
+        const narrative = getReportNarrative(completedTasks);
 
         // Header
         doc.setFontSize(22);
@@ -84,14 +116,7 @@ const Reports = () => {
 
             doc.setFont(undefined, 'normal');
             doc.setFontSize(12);
-            // Constructing narrative: "Today i washed the dishes and cleaned my room"
-            // We use the task text directly.
-            const taskListPhrase = completedTasks.map((t, i) => {
-                const text = t.text.trim();
-                return (i === completedTasks.length - 1 && i > 0) ? `and ${text}` : text;
-            }).join(completedTasks.length > 2 ? ", " : " ");
 
-            const narrative = `Today I ${taskListPhrase}.`;
             const splitNarrative = doc.splitTextToSize(narrative, 170);
             doc.text(splitNarrative, 20, yPos);
             yPos += splitNarrative.length * 7 + 10;
@@ -105,7 +130,7 @@ const Reports = () => {
             doc.setFontSize(12);
 
             completedTasks.forEach(t => {
-                doc.text(`• ${t.text} (${t.priority})`, 25, yPos);
+                doc.text(`• ${t.text} (${t.priority}) - ${t.category || 'General'}`, 25, yPos);
                 yPos += 7;
             });
         } else {
@@ -118,15 +143,7 @@ const Reports = () => {
     const generateDOC = () => {
         const date = new Date().toLocaleDateString();
         const completedTasks = tasks.filter(t => t.completed || t.status === "done");
-
-        const taskListPhrase = completedTasks.length > 0 ? completedTasks.map((t, i) => {
-            const text = t.text.trim();
-            return (i === completedTasks.length - 1 && i > 0) ? `and ${text}` : text;
-        }).join(completedTasks.length > 2 ? ", " : " ") : "";
-
-        const narrative = completedTasks.length > 0
-            ? `Today I ${taskListPhrase}.`
-            : "No tasks completed today.";
+        const narrative = getReportNarrative(completedTasks);
 
         const doc = new Document({
             sections: [{
@@ -154,7 +171,7 @@ const Reports = () => {
                         heading: HeadingLevel.HEADING_2
                     }),
                     ...completedTasks.map(t => new Paragraph({
-                        text: `• ${t.text} [${t.priority}]`,
+                        text: `• ${t.text} [${t.priority}] - ${t.category || 'General'}`,
                         bullet: { level: 0 }
                     }))
                 ]

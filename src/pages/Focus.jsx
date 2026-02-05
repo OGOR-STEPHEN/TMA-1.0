@@ -2,12 +2,21 @@ import React, { useState, useEffect } from "react";
 import Layout from "../components/Layout";
 import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
-import { Play, Pause, RotateCcw } from "lucide-react";
+import { Play, Pause, RotateCcw, Pencil, Check } from "lucide-react";
 
 const Focus = () => {
     const [timeLeft, setTimeLeft] = useState(25 * 60);
     const [isActive, setIsActive] = useState(false);
-    const [mode, setMode] = useState("focus"); // focus (25), short (5), long (15)
+    const [mode, setMode] = useState("focus"); // focus, short, long
+    const [durations, setDurations] = useState({ focus: 25, short: 5, long: 15 }); // in minutes
+    const [isEditing, setIsEditing] = useState(false);
+    const [editValue, setEditValue] = useState(25);
+
+    useEffect(() => {
+        if ("Notification" in window && Notification.permission !== "granted") {
+            Notification.requestPermission();
+        }
+    }, []);
 
     useEffect(() => {
         let interval = null;
@@ -17,26 +26,43 @@ const Focus = () => {
             }, 1000);
         } else if (timeLeft === 0) {
             setIsActive(false);
-            new Notification("Time's up!", { body: "Take a break!" });
+            if (Notification.permission === "granted") {
+                new Notification("Time's up!", {
+                    body: `${mode === 'focus' ? 'Focus session' : 'Break'} complete!`,
+                    icon: "/favicon.ico"
+                });
+            }
         }
         return () => clearInterval(interval);
-    }, [isActive, timeLeft]);
+    }, [isActive, timeLeft, mode]);
 
-    const toggleTimer = () => setIsActive(!isActive);
+    const toggleTimer = () => {
+        if (!isActive && Notification.permission !== "granted") {
+            Notification.requestPermission();
+        }
+        setIsActive(!isActive);
+    };
 
     const resetTimer = () => {
         setIsActive(false);
-        if (mode === "focus") setTimeLeft(25 * 60);
-        if (mode === "short") setTimeLeft(5 * 60);
-        if (mode === "long") setTimeLeft(15 * 60);
+        setTimeLeft(durations[mode] * 60);
     };
 
     const setTimerMode = (m) => {
         setMode(m);
         setIsActive(false);
-        if (m === "focus") setTimeLeft(25 * 60);
-        if (m === "short") setTimeLeft(5 * 60);
-        if (m === "long") setTimeLeft(15 * 60);
+        setIsEditing(false);
+        setEditValue(durations[m]);
+        setTimeLeft(durations[m] * 60);
+    };
+
+    const handleEditSave = () => {
+        const newMinutes = parseInt(editValue);
+        if (!isNaN(newMinutes) && newMinutes > 0) {
+            setDurations(prev => ({ ...prev, [mode]: newMinutes }));
+            setTimeLeft(newMinutes * 60);
+            setIsEditing(false);
+        }
     };
 
     const formatTime = (seconds) => {
@@ -45,7 +71,7 @@ const Focus = () => {
         return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
     };
 
-    const percentage = (timeLeft / (mode === "focus" ? 1500 : mode === "short" ? 300 : 900)) * 100;
+    const percentage = (timeLeft / (durations[mode] * 60)) * 100;
 
     return (
         <Layout>
@@ -57,16 +83,56 @@ const Focus = () => {
                 </div>
 
                 <div style={styles.timerWrapper}>
-                    <CircularProgressbar
-                        value={percentage}
-                        text={formatTime(timeLeft)}
-                        styles={buildStyles({
-                            textColor: "#fff",
-                            pathColor: mode === "focus" ? "#a75885" : "#10b981",
-                            trailColor: "rgba(255,255,255,0.1)",
-                            textSize: "24px"
-                        })}
-                    />
+                    <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+                        <CircularProgressbar
+                            value={percentage}
+                            text={!isEditing ? formatTime(timeLeft) : ""}
+                            styles={buildStyles({
+                                textColor: "#fff",
+                                pathColor: mode === "focus" ? "#a75885" : "#10b981",
+                                trailColor: "rgba(255,255,255,0.1)",
+                                textSize: "24px"
+                            })}
+                        />
+                        {/* Edit Overlay */}
+                        <div style={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            width: '100%',
+                            height: '100%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            flexDirection: 'column'
+                        }}>
+                            {isEditing ? (
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                    <input
+                                        type="number"
+                                        value={editValue}
+                                        onChange={(e) => setEditValue(e.target.value)}
+                                        style={styles.timeInput}
+                                        autoFocus
+                                    />
+                                    <span style={{ fontSize: '20px', color: '#rgba(255,255,255,0.8)' }}>min</span>
+                                </div>
+                            ) : null}
+                        </div>
+                    </div>
+
+                    {/* Floating Edit Button if not editing */}
+                    {!isEditing && !isActive && (
+                        <button onClick={() => { setIsEditing(true); setEditValue(durations[mode]); }} style={styles.editBtnSimple}>
+                            <Pencil size={16} /> Edit Duration
+                        </button>
+                    )}
+                    {/* Save Button if editing */}
+                    {isEditing && (
+                        <button onClick={handleEditSave} style={{ ...styles.editBtnSimple, background: '#10b981', color: '#000' }}>
+                            <Check size={16} /> Save
+                        </button>
+                    )}
                 </div>
 
                 <div style={styles.controls}>
@@ -154,6 +220,35 @@ const styles = {
         alignItems: "center",
         justifyContent: "center",
         cursor: "pointer"
+    },
+    editBtnSimple: {
+        position: 'absolute',
+        bottom: '-40px',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        background: 'rgba(255,255,255,0.1)',
+        border: 'none',
+        color: '#fff',
+        padding: '6px 12px',
+        borderRadius: '20px',
+        cursor: 'pointer',
+        fontSize: '12px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '6px',
+        transition: 'background 0.2s',
+        whiteSpace: 'nowrap'
+    },
+    timeInput: {
+        background: 'transparent',
+        border: 'none',
+        borderBottom: '2px solid #fff',
+        color: '#fff',
+        fontSize: '40px',
+        width: '80px',
+        textAlign: 'center',
+        outline: 'none',
+        fontWeight: 'bold'
     }
 };
 
