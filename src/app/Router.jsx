@@ -3,7 +3,6 @@ import Login from "../pages/Login.jsx";
 import Signup from "../pages/Signup";
 import Dashboard from "../pages/Dashboard";
 import Board from "../pages/Board";
-import Habits from "../pages/Habits";
 import Focus from "../pages/Focus";
 import Reports from "../pages/Reports";
 import ForgotPassword from "../pages/ForgotPassword.jsx";
@@ -60,14 +59,6 @@ const Router = () => {
               element={
                 <ProtectedRoute>
                   <Board />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/habits"
-              element={
-                <ProtectedRoute>
-                  <Habits />
                 </ProtectedRoute>
               }
             />

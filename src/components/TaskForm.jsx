@@ -53,10 +53,11 @@ const TaskForm = ({ onAdd, onCancel }) => {
                             value={priority}
                             onChange={(e) => setPriority(e.target.value)}
                             style={styles.select}
+                            className="custom-select"
                         >
-                            <option value="low">Low Priority</option>
-                            <option value="medium">Medium Priority</option>
-                            <option value="high">High Priority</option>
+                            <option value="low">Low</option>
+                            <option value="medium">Medium</option>
+                            <option value="high">High</option>
                         </select>
                     </div>
 
@@ -67,6 +68,7 @@ const TaskForm = ({ onAdd, onCancel }) => {
                             value={category}
                             onChange={(e) => setCategory(e.target.value)}
                             style={styles.select}
+                            className="custom-select"
                         >
                             <option value="personal">Personal</option>
                             <option value="work">Work</option>
@@ -81,17 +83,17 @@ const TaskForm = ({ onAdd, onCancel }) => {
                         <DatePicker
                             selected={dueDate}
                             onChange={(date) => setDueDate(date)}
-                            placeholderText="Set due date"
-                            className="custom-datepicker" // We will need to inject styles for this
-                            dateFormat="MMM d, yyyy"
+                            placeholderText="Due date"
+                            className="custom-datepicker"
+                            dateFormat="MMM d"
                             minDate={new Date()}
                         />
                     </div>
                 </div>
 
                 <button type="submit" style={styles.addButton}>
-                    <Save size={18} />
-                    Add Task
+                    <Save size={18} className="mobile-hide" />
+                    <span>Add</span>
                 </button>
             </div>
 
@@ -172,41 +174,49 @@ const styles = {
         alignItems: "center",
         gap: "6px",
         background: "rgba(255, 255, 255, 0.05)",
-        padding: "6px 10px",
-        borderRadius: "8px",
-        fontSize: "14px",
+        padding: "6px 12px",
+        borderRadius: "10px",
+        fontSize: "13px",
         color: "rgba(255, 255, 255, 0.8)",
+        border: "1px solid rgba(255, 255, 255, 0.05)",
+        minWidth: "100px",
     },
     select: {
         background: "transparent",
         border: "none",
-        color: "inherit",
-        fontSize: "14px",
+        color: "#fff",
+        fontSize: "13px",
+        fontWeight: "500",
         outline: "none",
         cursor: "pointer",
+        width: "100%",
+        padding: "2px 0",
     },
     dateWrapper: {
         display: "flex",
         alignItems: "center",
         gap: "6px",
         background: "rgba(255, 255, 255, 0.05)",
-        padding: "6px 10px",
-        borderRadius: "8px",
-        fontSize: "14px",
+        padding: "6px 12px",
+        borderRadius: "10px",
+        fontSize: "13px",
         color: "rgba(255, 255, 255, 0.8)",
+        border: "1px solid rgba(255, 255, 255, 0.05)",
     },
     addButton: {
         display: "flex",
         alignItems: "center",
         gap: "8px",
-        padding: "8px 16px",
+        padding: "10px 24px",
         background: "linear-gradient(135deg, #a75885, #8f3a76)",
         border: "none",
-        borderRadius: "8px",
+        borderRadius: "10px",
         color: "#fff",
-        fontWeight: "600",
+        fontWeight: "700",
+        fontSize: "14px",
         cursor: "pointer",
-        transition: "transform 0.1s",
+        transition: "all 0.2s ease",
+        boxShadow: "0 4px 12px rgba(167, 88, 133, 0.2)",
     },
 };
 

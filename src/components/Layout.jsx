@@ -19,8 +19,24 @@ const Layout = ({ children }) => {
                 color: textColor,
             }}
         >
-            <Sidebar />
-            <main style={styles.mainContent}>{children}</main>
+            <div className="mobile-hide">
+                <Sidebar />
+            </div>
+            <main style={styles.mainContent}>
+                <div style={styles.container}>
+                    {children}
+                </div>
+            </main>
+
+            <style>{`
+                @media (max-width: 768px) {
+                    main { 
+                        margin-left: 0 !important;
+                        padding: 20px !important;
+                    }
+                    .mobile-hide { display: none !important; }
+                }
+            `}</style>
         </div>
     );
 };
@@ -32,7 +48,13 @@ const styles = {
         padding: "40px",
         overflowY: "auto",
         height: "100vh",
+        display: "flex",
+        justifyContent: "center",
     },
+    container: {
+        width: "100%",
+        maxWidth: "1000px",
+    }
 };
 
 export default Layout;

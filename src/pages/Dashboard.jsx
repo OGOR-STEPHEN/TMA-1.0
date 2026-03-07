@@ -76,9 +76,9 @@ const Dashboard = () => {
   return (
     <Layout>
       <div style={styles.header}>
-        <h1>My Tasks</h1>
-        <div style={styles.stats}>
-          <span>{tasksLeft} tasks left</span>
+        <h1 style={styles.title}>Dashboard</h1>
+        <div style={styles.statsBadge}>
+          {tasksLeft} {tasksLeft === 1 ? 'Task' : 'Tasks'} Remaining
         </div>
       </div>
 
@@ -126,36 +126,62 @@ const styles = {
   header: {
     display: "flex",
     justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: "30px",
+    alignItems: "flex-end",
+    marginBottom: "40px",
+    flexWrap: "wrap",
+    gap: "16px",
   },
-  stats: {
-    fontSize: "14px",
-    opacity: 0.7,
+  title: {
+    fontSize: "32px",
+    fontWeight: "800",
+    margin: 0,
+    background: "linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.7) 100%)",
+    WebkitBackgroundClip: "text",
+    WebkitTextFillColor: "transparent",
+  },
+  statsBadge: {
+    fontSize: "13px",
+    fontWeight: "600",
+    color: "#a75885",
+    background: "rgba(167, 88, 133, 0.1)",
+    padding: "6px 16px",
+    borderRadius: "20px",
+    border: "1px solid rgba(167, 88, 133, 0.2)",
+    letterSpacing: "0.5px",
   },
   tabs: {
     display: "flex",
-    gap: "5px",
-    marginBottom: "20px",
-    paddingBottom: "10px",
-    borderBottom: "1px solid rgba(255,255,255,0.05)",
+    gap: "8px",
+    marginBottom: "24px",
+    padding: "4px",
+    background: "rgba(255,255,255,0.03)",
+    borderRadius: "12px",
+    width: "fit-content",
   },
   tab: {
     border: "none",
-    padding: "6px 12px",
-    borderRadius: "6px",
+    padding: "8px 20px",
+    borderRadius: "10px",
     cursor: "pointer",
     fontSize: "14px",
-    transition: "all 0.2s",
+    fontWeight: "600",
+    transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+    textTransform: "capitalize",
+    outline: "none",
   },
   list: {
     display: "flex",
     flexDirection: "column",
+    gap: "12px",
   },
   emptyState: {
     textAlign: "center",
-    padding: "40px",
-    opacity: 0.5,
+    padding: "60px 20px",
+    background: "rgba(255,255,255,0.02)",
+    borderRadius: "24px",
+    border: "2px dashed rgba(255,255,255,0.05)",
+    color: "rgba(255,255,255,0.4)",
+    fontSize: "15px",
   }
 };
 

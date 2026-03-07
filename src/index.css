@@ -29,6 +29,7 @@ a {
   color: #646cff;
   text-decoration: inherit;
 }
+
 a:hover {
   color: #535bf2;
 }
@@ -59,9 +60,11 @@ button {
   cursor: pointer;
   transition: border-color 0.25s;
 }
+
 button:hover {
   border-color: #646cff;
 }
+
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
@@ -74,16 +77,47 @@ button:focus-visible {
     --sky-bottom: #F4FCFF;
     background-color: var(--sky-bottom);
     background-image: linear-gradient(180deg, var(--sky-top) 0%, var(--sky-bottom) 65%),
-      radial-gradient(500px 110px at 15% 20%, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.8) 18%, rgba(255,255,255,0) 55%),
-      radial-gradient(420px 130px at 70% 35%, rgba(255,255,255,0.98) 0%, rgba(255,255,255,0.85) 16%, rgba(255,255,255,0) 50%);
+      radial-gradient(500px 110px at 15% 20%, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.8) 18%, rgba(255, 255, 255, 0) 55%),
+      radial-gradient(420px 130px at 70% 35%, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.85) 16%, rgba(255, 255, 255, 0) 50%);
     background-repeat: no-repeat;
     background-attachment: fixed;
     background-size: cover, 500px 200px, 420px 220px;
   }
+
   a:hover {
     color: #747bff;
   }
+
   button {
     background-color: #f9f9f9;
+  }
+}
+
+/* Custom Select Styling */
+.custom-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.6)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 14px;
+  padding-right: 28px !important;
+  color: #fff !important;
+}
+
+.custom-select option {
+  background-color: #1a1a1b;
+  /* Dark background for dropdown list */
+  color: #fff;
+  padding: 12px;
+}
+
+/* Responsiveness Utilities */
+@media (max-width: 768px) {
+  h1 {
+    font-size: 2.2em;
+  }
+
+  .mobile-hide {
+    display: none !important;
   }
 }

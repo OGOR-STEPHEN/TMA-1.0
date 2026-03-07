@@ -84,12 +84,17 @@ const TaskItem = ({ task, onToggle, onDelete, onUpdate }) => {
 
 const styles = {
     container: {
-        background: "rgba(255, 255, 255, 0.03)",
-        borderRadius: "12px",
-        marginBottom: "12px",
-        padding: "16px",
-        border: "1px solid rgba(255, 255, 255, 0.03)",
-        transition: "all 0.2s",
+        background: "rgba(255, 255, 255, 0.02)",
+        borderRadius: "16px",
+        padding: "16px 20px",
+        border: "1px solid rgba(255, 255, 255, 0.05)",
+        transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+        cursor: "default",
+        ":hover": {
+            background: "rgba(255, 255, 255, 0.04)",
+            transform: "translateY(-2px)",
+            borderColor: "rgba(255, 255, 255, 0.1)",
+        }
     },
     mainRow: {
         display: "flex",
@@ -97,47 +102,66 @@ const styles = {
         gap: "16px",
     },
     checkbox: {
-        width: "22px",
-        height: "22px",
-        borderRadius: "6px",
+        width: "24px",
+        height: "24px",
+        borderRadius: "8px",
         border: "2px solid",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         cursor: "pointer",
         padding: 0,
-        transition: "all 0.2s",
+        transition: "all 0.2s ease",
+        flexShrink: 0,
     },
     content: {
         flex: 1,
+        minWidth: 0, // Prevent text overflow
     },
     text: {
         fontSize: "16px",
-        fontWeight: "500",
+        fontWeight: "600",
         color: "#fff",
-        marginBottom: "4px",
+        marginBottom: "6px",
+        whiteSpace: "nowrap",
+        overflow: "hidden",
+        textOverflow: "ellipsis",
     },
     meta: {
         display: "flex",
-        gap: "12px",
+        gap: "16px",
         fontSize: "12px",
-        color: "rgba(255, 255, 255, 0.5)",
+        color: "rgba(255, 255, 255, 0.4)",
+        flexWrap: "wrap",
     },
     tag: {
         display: "flex",
         alignItems: "center",
-        gap: "4px",
+        gap: "6px",
+        background: "rgba(255,255,255,0.03)",
+        padding: "2px 8px",
+        borderRadius: "4px",
+        textTransform: "capitalize",
     },
     actions: {
         display: "flex",
-        gap: "8px",
+        gap: "4px",
+        opacity: 0.6,
+        transition: "opacity 0.2s",
+        ":hover": { opacity: 1 }
     },
     iconBtn: {
         background: "transparent",
         border: "none",
         color: "rgba(255, 255, 255, 0.4)",
         cursor: "pointer",
-        padding: "4px",
+        padding: "8px",
+        borderRadius: "8px",
+        transition: "all 0.2s",
+        ":hover": {
+            background: "rgba(239, 68, 68, 0.1)",
+            color: "#ef4444",
+        }
     },
 };
 
