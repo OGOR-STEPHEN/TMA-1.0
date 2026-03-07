@@ -20,6 +20,7 @@ export const addTaskToDB = async (uid, taskData) => {
     priority = "medium", 
     category = "personal", 
     dueDate = null, 
+    dueTime = null,
     reminderTime = null,
     subtasks = [],
     status = "todo" // todo, in-progress, done
@@ -33,7 +34,8 @@ export const addTaskToDB = async (uid, taskData) => {
     priority,
     category,
     dueDate,
-    reminderTime,
+    dueTime: dueTime || reminderTime || null,
+    reminderTime: reminderTime || dueTime || null,
     subtasks,
     createdAt: serverTimestamp(),
   });
@@ -57,6 +59,7 @@ export const fetchTasksFromDB = (uid, callback) => {
         status: data.status || (data.completed ? "done" : "todo"),
         priority: data.priority || "medium",
         category: data.category || "personal",
+        dueTime: data.dueTime || data.reminderTime || null,
         subtasks: data.subtasks || [],
         ...data,
       };

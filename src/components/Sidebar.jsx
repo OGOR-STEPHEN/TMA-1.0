@@ -34,7 +34,7 @@ const Sidebar = () => {
                 <h2 style={styles.logo}>TMA 1.0</h2>
             </div>
 
-            <nav style={styles.nav}>
+            <nav style={styles.nav} aria-label="Main navigation">
                 {navItems.map((item) => {
                     const isActive = location.pathname === item.path;
                     const Icon = item.icon;
@@ -46,8 +46,10 @@ const Sidebar = () => {
                                 ...styles.link,
                                 ...(isActive ? styles.activeLink : {}),
                             }}
+                            aria-current={isActive ? "page" : undefined}
+                            tabIndex={0}
                         >
-                            <Icon size={20} />
+                            <Icon size={20} aria-hidden="true" />
                             <span>{item.label}</span>
                         </Link>
                     );
@@ -55,8 +57,8 @@ const Sidebar = () => {
             </nav>
 
             <div style={styles.footer}>
-                <button onClick={handleLogout} style={styles.logoutButton}>
-                    <LogOut size={20} />
+                <button onClick={handleLogout} style={styles.logoutButton} aria-label="Logout" tabIndex={0}>
+                    <LogOut size={20} aria-hidden="true" />
                     <span>Logout</span>
                 </button>
             </div>

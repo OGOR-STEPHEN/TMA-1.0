@@ -58,6 +58,7 @@ const TopBar = () => {
         border: "none",
         background: "none",
         cursor: "pointer",
+        outline: "none",
       },
       avatar: {
         width: "32px",
@@ -78,6 +79,7 @@ const TopBar = () => {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
+        outline: "none",
         cursor: "pointer",
         backdropFilter: themeObj.backdropFilter,
         transition: "all 0.2s ease",

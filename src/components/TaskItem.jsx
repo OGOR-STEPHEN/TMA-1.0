@@ -4,8 +4,6 @@ import {
     Check,
     Trash2,
     Clock,
-    ChevronDown,
-    ChevronUp,
     Flag,
     Calendar,
     Tag
@@ -13,6 +11,8 @@ import {
 
 const TaskItem = ({ task, onToggle, onDelete, onUpdate }) => {
     const [expanded, setExpanded] = useState(false);
+    const dueDateValue = parseDueDate(task.dueDate);
+    const dueTimeLabel = formatDueTime(task.dueTime || task.reminderTime);
 
     // Helper to handle subtasks toggling
     // Note: Firestore update logic must be handled by parent or a service call passed down
@@ -40,8 +40,11 @@ const TaskItem = ({ task, onToggle, onDelete, onUpdate }) => {
                         background: task.completed ? "#a75885" : "transparent",
                         borderColor: task.completed ? "#a75885" : "rgba(255,255,255,0.3)"
                     }}
+                    aria-label={task.completed ? "Mark as incomplete" : "Mark as complete"}
+                    aria-checked={task.completed}
+                    role="checkbox"
                 >
-                    {task.completed && <Check size={12} color="#fff" />}
+                    {task.completed && <Check size={12} color="#fff" aria-hidden="true" />}
                 </button>
 
                 <div style={styles.content}>
@@ -57,10 +60,16 @@ const TaskItem = ({ task, onToggle, onDelete, onUpdate }) => {
                         <span style={{ color: priorityColor, display: 'flex', alignItems: 'center', gap: 4 }}>
                             <Flag size={12} /> {task.priority}
                         </span>
-                        {task.dueDate && (
+                        {dueDateValue && (
                             <span style={styles.tag}>
                                 <Calendar size={12} />
-                                {task.dueDate.seconds ? format(new Date(task.dueDate.seconds * 1000), "MMM d") : "Date"}
+                                {format(dueDateValue, "MMM d")}
+                            </span>
+                        )}
+                        {dueTimeLabel && (
+                            <span style={styles.tag}>
+                                <Clock size={12} />
+                                {dueTimeLabel}
                             </span>
                         )}
                         <span style={styles.tag}>
@@ -71,8 +80,8 @@ const TaskItem = ({ task, onToggle, onDelete, onUpdate }) => {
                 </div>
 
                 <div style={styles.actions}>
-                    <button onClick={() => onDelete(task.id)} style={styles.iconBtn}>
-                        <Trash2 size={16} />
+                    <button onClick={() => onDelete(task.id)} style={styles.iconBtn} aria-label="Delete task">
+                        <Trash2 size={16} aria-hidden="true" />
                     </button>
                 </div>
             </div>
@@ -80,6 +89,41 @@ const TaskItem = ({ task, onToggle, onDelete, onUpdate }) => {
             {/* Subtasks (if we add them later, hook it up here) */}
         </div>
     );
+};
+
+const parseDueDate = (rawDueDate) => {
+    if (!rawDueDate) return null;
+
+    if (rawDueDate instanceof Date) {
+        return Number.isNaN(rawDueDate.getTime()) ? null : rawDueDate;
+    }
+
+    if (typeof rawDueDate.toDate === "function") {
+        const convertedDate = rawDueDate.toDate();
+        return Number.isNaN(convertedDate.getTime()) ? null : convertedDate;
+    }
+
+    if (typeof rawDueDate.seconds === "number") {
+        const convertedDate = new Date(rawDueDate.seconds * 1000);
+        return Number.isNaN(convertedDate.getTime()) ? null : convertedDate;
+    }
+
+    const parsedDate = new Date(rawDueDate);
+    return Number.isNaN(parsedDate.getTime()) ? null : parsedDate;
+};
+
+const formatDueTime = (rawTime) => {
+    if (!rawTime || typeof rawTime !== "string") return null;
+
+    const match = rawTime.match(/^([01]\d|2[0-3]):([0-5]\d)$/);
+    if (!match) return rawTime;
+
+    const hours24 = Number(match[1]);
+    const minutes = match[2];
+    const hours12 = hours24 % 12 || 12;
+    const meridiem = hours24 >= 12 ? "PM" : "AM";
+
+    return `${hours12}:${minutes} ${meridiem}`;
 };
 
 const styles = {

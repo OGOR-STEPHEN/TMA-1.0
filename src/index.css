@@ -56,18 +56,28 @@ button {
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
+  background-color: #a75885;
+  color: #fff;
   cursor: pointer;
-  transition: border-color 0.25s;
+  transition: border-color 0.25s, background 0.25s, color 0.25s;
+  box-shadow: 0 2px 8px rgba(167,88,133,0.08);
 }
 
 button:hover {
+  background-color: #8a3c6b;
+  color: #fff;
   border-color: #646cff;
 }
 
 button:focus,
 button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  outline: 3px solid #646cff;
+  outline-offset: 2px;
+}
+
+button:active {
+  background-color: #7a2e5c;
+  color: #fff;
 }
 
 @media (prefers-color-scheme: light) {
